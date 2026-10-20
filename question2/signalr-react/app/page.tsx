@@ -24,24 +24,50 @@ export default function Home() {
   function connectToHub() {
     let newHubConnection = new HubConnectionBuilder()
     .withUrl('http://localhost:5282/hubs/pizza')
+    .withAutomaticReconnect()
     .build();
 
     // TODO: Mettre isConnected à true seulement une fois que la connection au Hub est faite
-    setIsConnected(true);
+    newHubConnection.on('Connected', (data) => {
+      setUserCount(data)
+    })
+
+    newHubConnection.start().then(() => { setHubConnection(newHubConnection); setIsConnected(true)} )
+    
+   
   }
 
   function selectChoice(selectedChoice:number) {
+    
+    hubConnection?.invoke('SelectChoice', selectedChoice)
+    hubConnection?.on('SelectChoice', (nbPizzas: number, pizzaPrice: number, money: number) => {
+      setNbPizzas(nbPizzas);
+      setPizzaPrice(pizzaPrice);
+      setMoney(money);
+    });
     setSelectedChoice(selectedChoice);
+
   }
 
   function unselectChoice() {
+   hubConnection?.invoke('UnselectChoice', selectedChoice)
     setSelectedChoice(-1);
   }
 
   function addMoney() {
+    hubConnection?.invoke('AddMoney', selectedChoice)
+    hubConnection?.on("AddMoney" ,(data) => {
+      setMoney(data)
+    })
   }
 
   function buyPizza() {
+    hubConnection?.invoke('BuyPizza', selectedChoice)
+    hubConnection?.on("BuyPizza", (nbPizzas : number, money: number) => {
+      setMoney(money);
+      setNbPizzas(nbPizzas);
+    })
+    
   }
 
   return (

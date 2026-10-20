@@ -29,7 +29,7 @@ export default function Home() {
     // TODO: Il faut appeler le serveur pour obtenir l'event retourné
     var type = (await axios.get("http://localhost:5269/api/dessins/GetDrawing1"))
     
-    applyEvents(type);
+    applyEvents(type.data);
     
   }
 
